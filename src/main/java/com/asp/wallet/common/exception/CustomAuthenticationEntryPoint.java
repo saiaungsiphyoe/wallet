@@ -12,7 +12,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
+
+    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public void commence(HttpServletRequest request,
@@ -25,19 +31,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 request.getRequestURI()
         );
 
-//        ObjectMapper mapper = new ObjectMapper();
-//        String json = mapper.writeValueAsString(error);
+        String json = objectMapper.writeValueAsString(error);
 
         response.setContentType("application/json");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.getWriter().write(convertToJson(error));
-    }
-
-    private String convertToJson(ErrorResponse error) {
-        // Simple manual JSON string; can use ObjectMapper if you prefer
-        return String.format(
-                "{\"status\":%d,\"error\":\"%s\",\"message\":\"%s\",\"path\":\"%s\",\"timestamp\":\"%s\"}",
-                error.getStatus(), error.getError(), error.getMessage(), error.getPath(), error.getTimestamp()
-        );
+        response.getWriter().write(json);
     }
 }

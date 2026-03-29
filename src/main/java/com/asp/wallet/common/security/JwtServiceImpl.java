@@ -1,6 +1,6 @@
-package com.asp.wallet.security;
+package com.asp.wallet.common.security;
 
-import com.asp.wallet.config.JwtProperties;
+import com.asp.wallet.common.config.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -33,7 +33,7 @@ public class JwtServiceImpl implements JwtService {
                 .add(claims)
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 250))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
                 .and()
                 .signWith(getKey())
                 .compact();
