@@ -27,15 +27,15 @@ public class WalletTransaction {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id", nullable = false)
+    @JoinColumn(name = "initiator_id")
     private AppUser initiator;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_wallet_id", nullable = false)
+    @JoinColumn(name = "from_wallet_id")
     private Wallet fromWallet;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_wallet_id", nullable = false)
+    @JoinColumn(name = "to_wallet_id")
     private Wallet toWallet;
 
     @Enumerated(EnumType.STRING)
@@ -43,7 +43,7 @@ public class WalletTransaction {
     private WalletTransactionType transactionType;
 
     @Column(name = "transaction_date", nullable = false)
-    private LocalDate TransactionDate;
+    private LocalDate transactionDate;
 
     @Column(precision = 19, scale = 4, nullable = false)
     private BigDecimal amount;
