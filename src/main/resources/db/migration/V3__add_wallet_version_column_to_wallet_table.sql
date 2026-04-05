@@ -1,0 +1,2 @@
+ALTER TABLE wallet
+ADD COLUMN version BIGINT NOT NULL DEFAULT 0 AFTER currency;

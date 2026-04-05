@@ -39,6 +39,9 @@ public class Wallet {
     @Column(nullable = false)
     private Currency currency;
 
+    @Version
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
