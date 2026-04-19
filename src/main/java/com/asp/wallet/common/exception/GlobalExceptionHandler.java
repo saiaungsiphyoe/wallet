@@ -3,6 +3,8 @@ package com.asp.wallet.common.exception;
 import com.asp.wallet.appuser.exception.UserNotFoundException;
 import com.asp.wallet.wallet.exception.InvalidWalletCommandException;
 import com.asp.wallet.wallet.exception.WalletNotFoundException;
+import com.asp.wallet.wallet.transactions.exception.InvalidWalletTransactionCommandException;
+import com.asp.wallet.wallet.transactions.exception.WalletTransactionException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidWalletCommandException.class)
     public ResponseEntity<ErrorResponse> handleInvalidWalletCommandException(Exception ex,
                                                                              HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return buildResponse(status, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(WalletTransactionException.class)
+    public ResponseEntity<ErrorResponse> handleWalletTransactionException(Exception ex,
+                                                                          HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return buildResponse(status, ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidWalletTransactionCommandException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWalletTransactionCommandException(Exception ex,
+                                                                                        HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return buildResponse(status, ex.getMessage(), request.getRequestURI());
     }

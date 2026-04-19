@@ -10,8 +10,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface WalletMapper {
 
-    @Mapping(target = "appUserId", source = "appUser.id")
-    @Mapping(target = "status", source = "status")
+    @Mapping(source = "appUser.id", target = "appUserId")
+    @Mapping(source = "status", target = "status")
     WalletResponse toResponse(Wallet wallet);
 
     List<WalletResponse> toResponseLists(List<Wallet> wallet);

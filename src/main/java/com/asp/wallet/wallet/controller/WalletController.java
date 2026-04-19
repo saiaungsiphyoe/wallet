@@ -35,7 +35,7 @@ public class WalletController {
 
     @GetMapping("/{walletId}")
     public ResponseEntity<WalletResponse> getWallet(@PathVariable Long walletId) {
-        Wallet wallet = walletReadService.retrieveWallet(walletId);
+        Wallet wallet = walletReadService.retrieveWalletById(walletId);
         return ResponseEntity.ok(walletMapper.toResponse(wallet));
     }
 

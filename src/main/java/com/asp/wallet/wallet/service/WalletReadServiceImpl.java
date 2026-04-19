@@ -2,6 +2,7 @@ package com.asp.wallet.wallet.service;
 
 import com.asp.wallet.appuser.model.AppUser;
 import com.asp.wallet.common.util.SecurityUtil;
+import com.asp.wallet.wallet.exception.WalletNotFoundException;
 import com.asp.wallet.wallet.model.Wallet;
 import com.asp.wallet.wallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,8 @@ public class WalletReadServiceImpl implements WalletReadService{
     }
 
     @Override
-    public Wallet retrieveWallet(Long appUserId) {
-        return null;
+    public Wallet retrieveWalletById(Long walletId) {
+        return walletRepository.findById(walletId)
+                .orElseThrow(() -> new WalletNotFoundException(walletId));
     }
 }

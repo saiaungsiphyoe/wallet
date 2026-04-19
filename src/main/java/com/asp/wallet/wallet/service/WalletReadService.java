@@ -7,6 +7,5 @@ import java.util.List;
 public interface WalletReadService {
     List<Wallet> retrieveCurrentUserWallets();
 
-    Wallet retrieveWallet(Long appUserId);
-
+    Wallet retrieveWalletById(Long walletId);
 }

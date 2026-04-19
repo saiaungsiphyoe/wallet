@@ -1,6 +1,7 @@
 package com.asp.wallet.wallet.model;
 
 import com.asp.wallet.appuser.model.AppUser;
+import com.asp.wallet.wallet.transactions.exception.WalletTransactionException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -75,5 +76,35 @@ public class Wallet {
 
     public void reject() {
          this.status = WalletStatus.REJECTED;
+    }
+
+    public void deposit(BigDecimal amount) {
+        validateWalletStatus();
+        validateTransactionAmount(amount);
+        this.balance = this.balance.add(amount);
+    };
+
+    public void withdraw(BigDecimal amount) {
+        validateWalletStatus();
+        validateSufficientBalance(amount);
+        this.balance = this.balance.subtract(amount);
+    }
+
+    public void validateWalletStatus() {
+        if (this.status != WalletStatus.ACTIVE) {
+            throw new WalletTransactionException("Wallet is inactive.");
+        }
+    }
+
+    public void validateTransactionAmount(BigDecimal amount) {
+        if (amount != null && amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new WalletTransactionException("Transaction amount must be greater than zero.");
+        }
+    }
+
+    public void validateSufficientBalance(BigDecimal amount) {
+        if (amount.compareTo(this.balance) > 0) {
+            throw new WalletTransactionException("Insufficient balance.");
+        }
     }
 }

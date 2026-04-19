@@ -61,4 +61,26 @@ public class WalletTransaction {
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    protected WalletTransaction(AppUser initiator, Wallet fromWallet, Wallet toWallet, LocalDate transactionDate, WalletTransactionType transactionType, BigDecimal amount, Currency currency) {
+        this.initiator = initiator;
+        this.fromWallet = fromWallet;
+        this.toWallet = toWallet;
+        this.transactionDate = transactionDate;
+        this.transactionType = transactionType;
+        this.amount = amount;
+        this.currency = currency;
+    }
+
+    public static WalletTransaction depositTransaction(AppUser initiator, Wallet toWallet, LocalDate transactionDate, BigDecimal amount) {
+        return new WalletTransaction(initiator, null, toWallet, transactionDate, WalletTransactionType.DEPOSIT, amount, toWallet.getCurrency());
+    }
+
+    public static WalletTransaction withdrawTransaction(AppUser initiator, Wallet fromWallet, LocalDate transactionDate, BigDecimal amount) {
+        return new WalletTransaction(initiator, fromWallet, null, transactionDate, WalletTransactionType.WITHDRAW, amount, fromWallet.getCurrency());
+    }
+
+    public static WalletTransaction transferTransaction(AppUser initiator, Wallet fromWallet, Wallet toWallet, LocalDate transactionDate, BigDecimal amount) {
+        return new WalletTransaction(initiator, fromWallet, toWallet, transactionDate, WalletTransactionType.TRANSFER, amount, fromWallet.getCurrency());
+    }
 }
