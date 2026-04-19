@@ -1,4 +1,4 @@
-package com.asp.wallet.security;
+package com.asp.wallet.common.security;
 
 import com.asp.wallet.appuser.model.AppUser;
 import com.asp.wallet.appuser.repository.AppUserRepository;

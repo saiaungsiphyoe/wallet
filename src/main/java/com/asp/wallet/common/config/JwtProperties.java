@@ -1,4 +1,4 @@
-package com.asp.wallet.config;
+package com.asp.wallet.common.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,5 +12,5 @@ import org.springframework.stereotype.Component;
 public class JwtProperties {
 
     private String secretKey;
-    private String expiration;
+    private Long expiration;
 }

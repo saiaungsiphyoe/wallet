@@ -1,12 +1,13 @@
 package com.asp.wallet.auth.service;
 
 import com.asp.wallet.appuser.dto.AppUserResponse;
+import com.asp.wallet.appuser.mapper.AppUserMapper;
 import com.asp.wallet.auth.dto.request.LoginRequest;
 import com.asp.wallet.auth.dto.request.RegisterRequest;
 import com.asp.wallet.auth.dto.response.AuthResponse;
 import com.asp.wallet.appuser.service.AppUserWriteService;
-import com.asp.wallet.security.JwtService;
-import com.asp.wallet.security.UserPrincipal;
+import com.asp.wallet.common.security.JwtService;
+import com.asp.wallet.common.security.UserPrincipal;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,16 +21,18 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final AppUserMapper appUserMapper;
 
     public AuthServiceImpl(AppUserWriteService appUserWriteService,
                            PasswordEncoder encoder,
                            AuthenticationManager authenticationManager,
-                           JwtService jwtService) {
+                           JwtService jwtService, AppUserMapper appUserMapper) {
 
         this.appUserWriteService = appUserWriteService;
         this.encoder = encoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.appUserMapper = appUserMapper;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
 
         request.setPassword(encoder.encode(request.getPassword()));
 
-        return appUserWriteService.createUser(request);
+        return appUserMapper.toResponse(appUserWriteService.createUser(request));
     }
 
     @Override

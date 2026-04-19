@@ -1,4 +1,4 @@
-package com.asp.wallet.security;
+package com.asp.wallet.common.security;
 
 import org.springframework.security.core.userdetails.UserDetails;
 
