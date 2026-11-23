@@ -338,7 +338,7 @@ Choose one of the following setup options.
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/Aung-Si-Phyoe/wallet.git
+git clone https://github.com/saiaungsiphyoe/wallet.git
 cd wallet
 ```
 
