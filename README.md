@@ -394,18 +394,13 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-# Future Improvements
+# Potential Future Improvements
 
-* Transaction history APIs
-* Pagination
-* Swagger / OpenAPI documentation
-* Docker support
 * Refresh tokens
 * Email notifications
 * Audit logs
 * Wallet statements
 * Multi-currency wallets
-* Unit and integration tests
 
 ---
 
