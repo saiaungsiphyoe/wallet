@@ -1,180 +1,178 @@
 # Wallet Application
 
-A secure RESTful digital wallet application built with **Spring Boot** that demonstrates modern backend development practices including **JWT authentication**, **Flyway database migrations**, **global exception handling**, and **wallet lifecycle management**.
+A secure RESTful digital wallet application built with **Java 17 and Spring Boot**. This project demonstrates practical backend development practices, including JWT authentication, database migrations, wallet lifecycle management, financial transaction processing, concurrency control, and global exception handling.
 
-The application allows users to register, manage their wallets, activate wallets, deposit funds, withdraw funds, and transfer money securely while enforcing wallet state transitions and business rules.
+Users can register, manage their wallets, activate wallets, deposit funds, withdraw funds, and transfer money between wallets while the application enforces ownership, wallet state transitions, and business rules.
 
----
+## Features
 
-# Features
+### Authentication and Security
+- JWT-based authentication
+- Secure password hashing using BCrypt
+- Stateless authentication with Spring Security
+- Protected REST API endpoints
+- Wallet ownership validation
 
-## Authentication & Security
-
-* JWT-based authentication
-* Secure password storage using BCrypt
-* Stateless authentication
-* Protected REST APIs using Spring Security
-
-## Wallet Management
-
-* Automatic wallet creation upon user registration
-* Wallet lifecycle management
-* Wallet activation and status management
-* Retrieve authenticated user's wallets
-* Retrieve wallet details by ID
+### Wallet Management
+- Automatic wallet creation upon user registration
+- Wallet lifecycle management
+- Wallet activation and status management
+- Retrieve the authenticated user's wallet
+- Retrieve wallet details by ID
+- Validation of wallet ownership and state transitions
 
 Supported wallet states:
 
-* Pending
-* Active
-* Deactivated
-* Suspended
-* Closed
-* Rejected
+- `PENDING`
+- `ACTIVE`
+- `SUSPENDED`
+- `CLOSED`
+- `REJECTED`
 
 Supported wallet commands:
 
-* ACTIVATE
-* DEACTIVATE
-* SUSPEND
-* CLOSE
-* REJECT
+- `ACTIVATE`
+- `SUSPEND`
+- `CLOSE`
+- `REJECT`
 
-## Wallet Transactions
+Only wallets in the `ACTIVE` state can perform financial transactions.
 
-* Deposit funds
-* Withdraw funds
-* Transfer funds between wallets
-* Wallet balance validation
-* Business rule validation before processing transactions
+### Wallet Transactions
+- Deposit funds
+- Withdraw funds
+- Transfer funds between wallets
+- Wallet balance validation
+- Currency validation
+- Business rule validation before processing transactions
+- Transaction history retrieval
+- Optimistic locking to protect against conflicting concurrent updates
 
 Supported transaction commands:
 
-* DEPOSIT
-* WITHDRAW
-* TRANSFER
+- `DEPOSIT`
+- `WITHDRAW`
+- `TRANSFER`
 
-## Database
+### Database and Error Handling
+- MySQL database integration
+- Version-controlled database migrations using Flyway
+- Automatic schema migration on application startup
+- Centralized exception handling
+- Consistent JSON error responses
+- Meaningful business validation messages
 
-* MySQL
-* Flyway database migrations
-* Automatic schema versioning
+## Technology Stack
 
-## Error Handling
+| Technology | Purpose |
+|---|---|
+| Java 17 | Programming language |
+| Spring Boot | Application framework |
+| Spring Security | Authentication and authorization |
+| JWT | Stateless authentication |
+| Spring Data JPA | Data persistence |
+| Hibernate | Object-relational mapping |
+| MySQL | Relational database |
+| Flyway | Database schema migration |
+| Maven | Build and dependency management |
+| Docker | Application containerization |
+| Docker Compose | Application and database orchestration |
+| Springdoc OpenAPI | API documentation |
+| MapStruct | DTO mapping |
+| Lombok | Boilerplate code reduction |
 
-* Global exception handling
-* Consistent JSON error responses
-* Meaningful business validation messages
+## Architecture
 
----
-
-# Technology Stack
-
-| Technology      | Purpose                        |
-| --------------- | ------------------------------ |
-| Java            | Programming Language           |
-| Spring Boot     | Application Framework          |
-| Spring Security | Authentication & Authorization |
-| JWT             | Stateless Authentication       |
-| Spring Data JPA | Data Persistence               |
-| Hibernate       | ORM                            |
-| MySQL           | Database                       |
-| Flyway          | Database Migration             |
-| Maven           | Build Tool                     |
-
----
-
-# Architecture
-
-The project follows a layered architecture:
+The application follows a layered architecture that separates API handling, business logic, and data persistence.
 
 ```text
-Controller
-      │
-      ▼
-Service
-      │
-      ▼
-Repository
-      │
-      ▼
-MySQL
+             Client
+                |
+                v
+           Controller
+                |
+                v
+             Service
+                |
+                v
+           Repository
+                |
+                v
+              MySQL
 ```
 
-Additional layers:
+Additional components support the application:
 
-* DTOs
-* Entity Mappers
-* Security
-* Exception Handling
-* Configuration
+- **DTOs:** Separate API request and response models from persistence entities.
+- **Mappers:** Convert between entities and DTOs.
+- **Security:** Handle authentication and authorization.
+- **Exception Handling:** Centralize application and business exception responses.
+- **Configuration:** Manage application, database, and security configuration.
 
----
+## Wallet Lifecycle
 
-# Wallet Lifecycle
+Newly registered users receive a wallet in the `PENDING` state.
 
-When a user registers, a wallet is automatically created with the **PENDING** status.
+The wallet follows these lifecycle rules:
 
-Only **ACTIVE** wallets can perform financial transactions.
+- `PENDING` wallets can be activated or rejected.
+- `ACTIVE` wallets can be suspended or closed.
+- `SUSPENDED` wallets can be reactivated or closed.
+- `CLOSED` and `REJECTED` wallets cannot be reactivated.
+- Only `ACTIVE` wallets can perform financial transactions.
 
 ```text
-Register User
-      │
-      ▼
-Create Wallet
-      │
-      ▼
-PENDING
-      │
-Activate
-      ▼
-ACTIVE
-      │
- ├── Deposit
- ├── Withdraw
- ├── Transfer
- │
- ├── Suspend
- ├── Deactivate
- └── Close
+                 User Registration
+                        |
+                        v
+                     PENDING
+                    /       \
+               ACTIVATE    REJECT
+                  |           |
+                  v           v
+                ACTIVE     REJECTED
+               /     \
+          SUSPEND    CLOSE
+             |          |
+             v          v
+          SUSPENDED   CLOSED
+           /     \
+      ACTIVATE   CLOSE
+          |         |
+          v         v
+        ACTIVE    CLOSED
 ```
 
----
+## REST API
 
-# REST API
+All protected endpoints require a valid JWT access token, except for the public authentication endpoints and explicitly permitted application endpoints.
 
-## Authentication
+### Authentication
 
-| Method | Endpoint             | Description                             |
-| ------ | -------------------- | --------------------------------------- |
-| POST   | `/api/auth/register` | Register a new user                     |
-| POST   | `/api/auth/login`    | Authenticate user and receive JWT token |
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register a new user |
+| POST | `/api/auth/login` | Authenticate a user and receive a JWT |
 
----
+### Wallet APIs
 
-## Wallet APIs
-
-### Retrieve Current User Wallets
+**Retrieve the current user's wallet**
 
 ```http
 GET /api/wallets/me
 ```
 
-Returns all wallets owned by the authenticated user.
+Retrieves the authenticated user's wallet.
 
----
-
-### Retrieve Wallet by ID
+**Retrieve a wallet by ID**
 
 ```http
 GET /api/wallets/{walletId}
 ```
 
-Returns wallet information.
+Returns wallet information. Access is restricted to the wallet owner.
 
----
-
-### Update Wallet Status
+**Update wallet status**
 
 ```http
 POST /api/wallets/{walletId}?command=ACTIVATE
@@ -182,25 +180,30 @@ POST /api/wallets/{walletId}?command=ACTIVATE
 
 Supported commands:
 
-| Command    | Description                  |
-| ---------- | ---------------------------- |
-| ACTIVATE   | Activate a pending wallet    |
-| DEACTIVATE | Deactivate an active wallet  |
-| SUSPEND    | Suspend wallet operations    |
-| CLOSE      | Permanently close the wallet |
-| REJECT     | Reject a pending wallet      |
+| Command | Description |
+|---|---|
+| `ACTIVATE` | Activate a pending or suspended wallet |
+| `SUSPEND` | Suspend an active wallet |
+| `CLOSE` | Permanently close an eligible wallet |
+| `REJECT` | Reject a pending wallet |
 
----
+The application validates each requested state transition before applying it.
 
-## Wallet Transaction APIs
+### Wallet Transaction APIs
 
-### Deposit
+All transaction operations use:
+
+```http
+POST /api/wallet-transactions?command={COMMAND}
+```
+
+**Deposit**
 
 ```http
 POST /api/wallet-transactions?command=DEPOSIT
 ```
 
-Example request body:
+Example request:
 
 ```json
 {
@@ -209,15 +212,13 @@ Example request body:
 }
 ```
 
----
-
-### Withdraw
+**Withdraw**
 
 ```http
 POST /api/wallet-transactions?command=WITHDRAW
 ```
 
-Example request body:
+Example request:
 
 ```json
 {
@@ -226,15 +227,13 @@ Example request body:
 }
 ```
 
----
-
-### Transfer
+**Transfer**
 
 ```http
 POST /api/wallet-transactions?command=TRANSFER
 ```
 
-Example request body:
+Example request:
 
 ```json
 {
@@ -244,45 +243,72 @@ Example request body:
 }
 ```
 
-Business rules include:
+Transaction business rules include:
 
-* Source wallet must be ACTIVE
-* Destination wallet must be ACTIVE
-* Sufficient balance required
-* Amount must be greater than zero
-* Wallet must exist
+- The source wallet must be `ACTIVE`.
+- The destination wallet must be `ACTIVE`.
+- The source wallet must have sufficient funds for withdrawals and transfers.
+- The transaction amount must be greater than zero.
+- Referenced wallets must exist.
+- Wallet currencies must be compatible.
 
----
+### Transaction History
 
-# Database Migration
+**Retrieve paginated transaction history**
 
-The project uses **Flyway** for version-controlled database migrations.
+```http
+GET /api/wallets/{walletId}/transactions
+```
+
+**Retrieve an individual transaction**
+
+```http
+GET /api/wallets/{walletId}/transactions/{transactionId}
+```
+
+Transaction history includes transactions associated with the specified wallet, including incoming and outgoing transactions. Access is restricted to the authenticated wallet owner.
+
+The transaction history endpoint supports pagination and sorting through Spring Data pagination parameters.
+
+## Concurrency Control
+
+The application uses **optimistic locking** to protect wallet balances against conflicting concurrent updates.
+
+Each wallet maintains a version field. When multiple transactions attempt to update the same wallet concurrently, the version is checked to detect stale updates and prevent them from silently overwriting newer balances.
+
+Conflicting updates are handled with an appropriate error response.
+
+## Database Migrations
+
+The project uses **Flyway** for version-controlled database schema migrations.
 
 On application startup:
 
-* Flyway validates migration history.
-* Pending migrations are executed automatically.
-* Database schema stays synchronized with the application.
+- Flyway validates the existing migration history.
+- Pending migrations are executed automatically.
+- The database schema is kept synchronized with the application.
 
----
+Hibernate schema generation is disabled so that Flyway remains responsible for database schema changes.
 
-# Global Exception Handling
+## Global Exception Handling
 
 The application centralizes exception handling to provide consistent and meaningful error responses.
 
 Handled scenarios include:
 
-* Invalid credentials
-* Unauthorized access
-* Validation failures
-* Wallet not found
-* Wallet not active
-* Invalid wallet state transition
-* Insufficient balance
-* Invalid transaction request
-* Resource not found
+- Invalid credentials
+- Unauthorized access
+- Access denied
+- Request validation failures
+- Wallet not found
+- Wallet not active
+- Invalid wallet state transitions
+- Insufficient balance
+- Invalid transaction requests
+- Optimistic locking conflicts
+- Unexpected application errors
 
-Example response:
+Example error response:
 
 ```json
 {
@@ -294,50 +320,95 @@ Example response:
 }
 ```
 
----
+## Getting Started
 
-# Getting Started
+### Prerequisites
 
-## Prerequisites
+Choose one of the following setup options.
 
-* Java 17+
-* Maven
-* MySQL
+**Option 1: Docker Compose**
+- Docker
+- Docker Compose plugin
 
----
+**Option 2: Run locally**
+- Java 17 or later
+- MySQL 8.0
+- Maven (optional, since the project includes the Maven wrapper)
 
-## Clone Repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/Aung-Si-Phyoe/wallet.git
 cd wallet
 ```
 
-## Create the Database
+### Run with Docker Compose
 
-Create a MySQL database named `wallet`.
+Docker Compose builds the application image and starts the application together with MySQL.
+
+**1. Create your environment file**
+
+Linux/macOS:
+
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**2. Configure environment variables**
+
+Edit `.env` and set your database passwords and JWT secret.
+
+The values in `.env.example` are intended for local development only. Replace them with appropriate values before deploying the application.
+
+**3. Build and start the services**
+
+```bash
+docker compose up --build
+```
+
+Docker Compose waits for the MySQL health check before starting the application.
+
+**4. Access the application**
+
+- API base URL: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- Health endpoint: `http://localhost:8080/actuator/health`
+
+**5. Stop the services**
+
+```bash
+docker compose down
+```
+
+This preserves the named MySQL volume and its data.
+
+To stop the services and remove the database volume as well:
+
+```bash
+docker compose down -v
+```
+
+**Note:** The `-v` option permanently removes the persisted database data.
+
+### Run Locally
+
+**1. Create a MySQL database**
 
 ```sql
 CREATE DATABASE wallet;
 ```
 
----
+**2. Configure the database connection**
 
-## Configuration
+Set the required environment variables.
 
-The application is configured through **environment variables** with sensible default values.
-
-If no environment variables are provided, the application will use the defaults shown below.
-
-| Environment Variable | Default Value                                                                                    |
-| -------------------- |--------------------------------------------------------------------------------------------------|
-| `DB_URL`             | `jdbc:mysql://localhost:3306/wallet?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true` |
-| `DB_USERNAME`        | `root`                                                                                           |
-| `DB_PASSWORD`        | `mysql`                                                                                          |
-| `JWT_SECRET_KEY`     | Default development secret key                                                                   |
-| `JWT_EXPIRATION`     | `3600000` (1 hour)                                                                               |
-
-Example (Linux/macOS):
+Linux/macOS:
 
 ```bash
 export DB_USERNAME=root
@@ -346,7 +417,7 @@ export JWT_SECRET_KEY=your-secret-key
 export JWT_EXPIRATION=3600000
 ```
 
-Example (Windows PowerShell):
+Windows PowerShell:
 
 ```powershell
 $env:DB_USERNAME="root"
@@ -355,74 +426,100 @@ $env:JWT_SECRET_KEY="your-secret-key"
 $env:JWT_EXPIRATION="3600000"
 ```
 
-> **Important:** Replace the default JWT secret with your own secure secret before deploying the application.
+If your MySQL connection differs from the default configuration, also set `DB_URL`.
 
+**3. Start the application**
 
----
-
-## Run the Application
-
-### Linux / macOS
+Linux/macOS:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-### Windows
+Windows:
 
-```cmd
-mvnw.cmd spring-boot:run
+```powershell
+.\mvnw.cmd spring-boot:run
 ```
 
 On startup:
 
-* Flyway automatically creates and updates the database schema.
-* The application starts with the configured MySQL database.
-* Protected endpoints require a valid JWT access token.
+- Flyway automatically validates and applies pending database migrations.
+- The application connects to the configured MySQL database.
+- Protected endpoints require a valid JWT access token.
 
----
+## Configuration
 
-# Authentication
+The application supports configuration through environment variables. The following defaults are defined for local development.
 
-Authenticate using the login endpoint to obtain a JWT.
+| Environment Variable | Default Value |
+|---|---|
+| `DB_URL` | `jdbc:mysql://localhost:3306/wallet?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true` |
+| `DB_USERNAME` | `root` |
+| `DB_PASSWORD` | `mysql` |
+| `JWT_SECRET_KEY` | Development secret defined in application configuration |
+| `JWT_EXPIRATION` | `3600000` (1 hour) |
 
-Include the token in every protected request.
+**Important:** Do not use the default database credentials or JWT secret in a production environment. Supply secure values through environment variables or an appropriate secrets management solution.
+
+## API Authentication
+
+Authenticate through the login endpoint to obtain a JWT access token.
+
+Include the token in the `Authorization` header when calling protected endpoints:
 
 ```http
 Authorization: Bearer <JWT_TOKEN>
 ```
 
+Swagger UI also supports bearer-token authentication through its **Authorize** feature.
+
+## Running Tests
+
+Run the complete test suite and verify the application build using the Maven wrapper.
+
+Linux/macOS:
+
+```bash
+./mvnw clean verify
+```
+
+Windows PowerShell:
+
+```powershell
+.\mvnw.cmd clean verify
+```
+
+The integration test suite covers wallet lifecycle operations, financial transactions, transaction history, and concurrent wallet updates.
+
+## Potential Future Improvements
+
+- Refresh token support
+- Email notifications
+- Audit logging
+- Wallet statements
+- Multi-currency wallet support
+
+## What This Project Demonstrates
+
+This project showcases practical backend development skills, including:
+
+- Spring Boot REST API development
+- JWT authentication and Spring Security
+- Secure API design
+- Layered application architecture
+- Business rule implementation
+- Wallet lifecycle management
+- Deposit, withdrawal, and transfer operations
+- DTO and mapper patterns
+- Flyway database migrations
+- MySQL integration
+- Global exception handling
+- Transactional service methods
+- Optimistic locking and concurrency control
+- Docker-based application deployment
+- Integration testing
+
 ---
 
-# Future Improvements
-
-* Transaction history APIs
-* Pagination
-* Swagger / OpenAPI documentation
-* Docker support
-* Refresh tokens
-* Email notifications
-* Audit logs
-* Wallet statements
-* Multi-currency wallets
-* Unit and integration tests
-
----
-
-# What This Project Demonstrates
-
-This project showcases practical backend development skills including:
-
-* Spring Boot REST API development
-* JWT authentication with Spring Security
-* Secure API design
-* Layered architecture
-* Business rule implementation
-* Wallet lifecycle management
-* Deposit, withdraw, and transfer operations
-* DTO and Mapper patterns
-* Flyway database migrations
-* MySQL integration
-* Global exception handling
-* Transactional service methods
-* Clean, maintainable, and scalable backend design
+**Built with Java, Spring Boot, and MySQL.**

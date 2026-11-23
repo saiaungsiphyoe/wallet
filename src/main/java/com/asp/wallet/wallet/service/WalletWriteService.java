@@ -9,9 +9,7 @@ public interface WalletWriteService {
 
     Wallet activateWallet(Long walletId);
 
-    Wallet deactivateWallet(Long walletId);
-
-    Wallet suspendWallet(Long walletId);;
+    Wallet suspendWallet(Long walletId);
 
     Wallet closeWallet(Long walletId);
 

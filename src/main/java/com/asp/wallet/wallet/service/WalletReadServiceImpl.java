@@ -27,6 +27,14 @@ public class WalletReadServiceImpl implements WalletReadService{
 
     @Override
     public Wallet retrieveWalletById(Long walletId) {
+        AppUser appUser = SecurityUtil.getCurrentUser();
+
+        return walletRepository.findByIdAndAppUser_Id(walletId, appUser.getId())
+                .orElseThrow(() -> new WalletNotFoundException(walletId));
+    }
+
+    @Override
+    public Wallet retrieveWalletForTransfer(Long walletId) {
         return walletRepository.findById(walletId)
                 .orElseThrow(() -> new WalletNotFoundException(walletId));
     }
