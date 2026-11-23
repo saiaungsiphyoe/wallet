@@ -300,9 +300,10 @@ Example response:
 
 ## Prerequisites
 
-* Java 17+
-* Maven
-* MySQL
+Choose one of the following setup options:
+
+* **Docker Compose:** Docker with the Compose plugin
+* **Run locally:** Java 17+, Maven, and MySQL
 
 ---
 
@@ -312,6 +313,40 @@ Example response:
 git clone https://github.com/Aung-Si-Phyoe/wallet.git
 cd wallet
 ```
+
+## Run with Docker Compose
+
+Docker Compose builds the application image and starts the application with MySQL.
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` to set your database passwords and a secure `JWT_SECRET_KEY`. The example values are for local development only.
+
+Build and start the services:
+
+```bash
+docker compose up --build
+```
+
+Once the services start, the API is available at `http://localhost:8080`. OpenAPI documentation is available at `http://localhost:8080/swagger-ui/index.html`.
+
+Stop the containers while preserving the database volume:
+
+```bash
+docker compose down
+```
+
+---
 
 ## Create the Database
 
