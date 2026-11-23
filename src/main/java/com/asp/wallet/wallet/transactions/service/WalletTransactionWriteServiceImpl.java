@@ -3,9 +3,8 @@ package com.asp.wallet.wallet.transactions.service;
 import com.asp.wallet.appuser.model.AppUser;
 import com.asp.wallet.common.util.SecurityUtil;
 import com.asp.wallet.wallet.model.Wallet;
-import com.asp.wallet.wallet.model.WalletStatus;
 import com.asp.wallet.wallet.service.WalletReadService;
-import com.asp.wallet.wallet.transactions.exception.WalletTransactionException;
+import com.asp.wallet.wallet.exception.WalletOperationException;
 import com.asp.wallet.wallet.transactions.model.WalletTransaction;
 import com.asp.wallet.wallet.transactions.repository.WalletTransactionRepository;
 import org.springframework.stereotype.Service;
@@ -67,9 +66,9 @@ public class WalletTransactionWriteServiceImpl implements WalletTransactionWrite
         AppUser currentUser = SecurityUtil.getCurrentUser();
 
         Wallet fromWallet = walletReadService.retrieveWalletById(fromWalletId);
-        Wallet toWallet = walletReadService.retrieveWalletById(toWalletId);
+        Wallet toWallet = walletReadService.retrieveWalletForTransfer(toWalletId);
 
-        validateForBalanceTransfer(fromWallet, toWallet, amount);
+        validateForBalanceTransfer(fromWallet, toWallet);
 
         fromWallet.withdraw(amount);
         toWallet.deposit(amount);
@@ -79,29 +78,17 @@ public class WalletTransactionWriteServiceImpl implements WalletTransactionWrite
         return walletTransactionRepository.save(walletTransaction);
     }
 
-    private void validateForBalanceTransfer(Wallet fromWallet, Wallet toWallet, BigDecimal amount) {
-        if (fromWallet.getStatus() != WalletStatus.ACTIVE) {
-            throw new WalletTransactionException("Source wallet is inactive.");
-        }
-
-        if (toWallet.getStatus() != WalletStatus.ACTIVE) {
-            throw new WalletTransactionException("Target wallet is inactive.");
-        }
-
+    private void validateForBalanceTransfer(Wallet fromWallet, Wallet toWallet) {
         if (fromWallet.getId().equals(toWallet.getId())) {
-            throw new WalletTransactionException("Cannot transfer to same wallet.");
+            throw new WalletOperationException(
+                    "Cannot transfer to same wallet."
+            );
         }
 
         if (fromWallet.getCurrency() != toWallet.getCurrency()) {
-            throw new WalletTransactionException("Currency mismatch between source and target wallets.");
-        }
-
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new WalletTransactionException("Transaction amount cannot be zero.");
-        }
-
-        if (fromWallet.getBalance().compareTo(amount) < 0) {
-            throw new WalletTransactionException("Insufficient balance.");
+            throw new WalletOperationException(
+                    "Currency mismatch between source and target wallets."
+            );
         }
     }
 }

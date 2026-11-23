@@ -8,4 +8,6 @@ public interface WalletReadService {
     List<Wallet> retrieveCurrentUserWallets();
 
     Wallet retrieveWalletById(Long walletId);
+
+    Wallet retrieveWalletForTransfer(Long walletId);
 }
