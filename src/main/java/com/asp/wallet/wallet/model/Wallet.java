@@ -1,22 +1,21 @@
 package com.asp.wallet.wallet.model;
 
 import com.asp.wallet.appuser.model.AppUser;
-import com.asp.wallet.wallet.transactions.exception.WalletTransactionException;
+import com.asp.wallet.wallet.exception.InvalidWalletCommandException;
+import com.asp.wallet.wallet.exception.WalletOperationException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "wallet")
 public class Wallet {
@@ -52,59 +51,92 @@ public class Wallet {
     private LocalDateTime updatedAt;
 
     public Wallet(AppUser appUser, Currency currency) {
-        this.appUser = appUser;
+        this.appUser = Objects.requireNonNull(appUser, "AppUser cannot be null.");
         this.status = WalletStatus.PENDING;
-        this.currency = currency;
+        this.currency = Objects.requireNonNull(currency, "Currency cannot be null.");
         this.balance = BigDecimal.ZERO;
     }
 
     public void activate() {
+        if (this.status != WalletStatus.PENDING && this.status != WalletStatus.SUSPENDED) {
+            throw new InvalidWalletCommandException(
+                    "Only pending or suspended wallets can be activated."
+            );
+        }
+
         this.status = WalletStatus.ACTIVE;
     }
 
-    public void deactivate() {
-        this.status = WalletStatus.PENDING;
-    }
-
     public void suspend() {
+        if (this.status != WalletStatus.ACTIVE) {
+            throw new InvalidWalletCommandException(
+                    "Only active wallets can be suspended."
+            );
+        }
+
         this.status = WalletStatus.SUSPENDED;
     }
 
     public void close() {
-         this.status = WalletStatus.CLOSED;
+        if (this.status != WalletStatus.ACTIVE && this.status != WalletStatus.SUSPENDED) {
+            throw new InvalidWalletCommandException(
+                    "Only active or suspended wallets can be closed."
+            );
+        }
+
+        if (this.balance.compareTo(BigDecimal.ZERO) != 0) {
+            throw new WalletOperationException(
+                    "Wallet must have zero balance before it can be closed."
+            );
+        }
+
+        this.status = WalletStatus.CLOSED;
     }
 
     public void reject() {
-         this.status = WalletStatus.REJECTED;
+        if (this.status != WalletStatus.PENDING) {
+            throw new InvalidWalletCommandException(
+                    "Only pending wallets can be rejected."
+            );
+        }
+
+        this.status = WalletStatus.REJECTED;
     }
 
     public void deposit(BigDecimal amount) {
         validateWalletStatus();
         validateTransactionAmount(amount);
+
         this.balance = this.balance.add(amount);
-    };
+    }
 
     public void withdraw(BigDecimal amount) {
         validateWalletStatus();
+        validateTransactionAmount(amount);
         validateSufficientBalance(amount);
+
         this.balance = this.balance.subtract(amount);
     }
 
-    public void validateWalletStatus() {
+    private void validateWalletStatus() {
         if (this.status != WalletStatus.ACTIVE) {
-            throw new WalletTransactionException("Wallet is inactive.");
+            throw new WalletOperationException(
+                    "Transactions are not allowed for wallets with status: " + this.status
+            );
         }
     }
 
-    public void validateTransactionAmount(BigDecimal amount) {
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new WalletTransactionException("Transaction amount must be greater than zero.");
+    private void validateTransactionAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new WalletOperationException(
+                    "Transaction amount must be greater than zero."
+            );
         }
     }
 
-    public void validateSufficientBalance(BigDecimal amount) {
-        if (amount.compareTo(this.balance) > 0) {
-            throw new WalletTransactionException("Insufficient balance.");
+    private void validateSufficientBalance(BigDecimal amount) {
+        if (this.balance.compareTo(amount) < 0) {
+            throw new WalletOperationException("Insufficient balance.");
         }
     }
 }

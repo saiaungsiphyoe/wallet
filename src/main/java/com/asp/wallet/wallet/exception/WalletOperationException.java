@@ -1,7 +1,7 @@
-package com.asp.wallet.wallet.transactions.exception;
+package com.asp.wallet.wallet.exception;
 
-public class WalletTransactionException extends RuntimeException {
-    public WalletTransactionException(String message) {
+public class WalletOperationException extends RuntimeException {
+    public WalletOperationException(String message) {
         super(message);
     }
 }

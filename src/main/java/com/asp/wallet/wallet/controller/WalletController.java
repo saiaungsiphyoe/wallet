@@ -6,11 +6,13 @@ import com.asp.wallet.wallet.model.Wallet;
 import com.asp.wallet.wallet.model.WalletCommand;
 import com.asp.wallet.wallet.service.WalletReadService;
 import com.asp.wallet.wallet.service.WalletWriteService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/wallets")
 public class WalletController {
@@ -50,7 +52,6 @@ public class WalletController {
     private Wallet handleCommand(Long walletId, WalletCommand command) {
         return switch (command) {
             case ACTIVATE -> walletWriteService.activateWallet(walletId);
-            case DEACTIVATE -> walletWriteService.deactivateWallet(walletId);
             case SUSPEND -> walletWriteService.suspendWallet(walletId);
             case CLOSE -> walletWriteService.closeWallet(walletId);
             case REJECT -> walletWriteService.rejectWallet(walletId);
